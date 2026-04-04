@@ -1,0 +1,18 @@
+import os
+import sys
+import dill
+import numpy as np 
+import pandas as pd
+
+
+
+from src.exception import CustomException
+
+import pickle
+import os
+
+def save_object(file_path, obj):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    with open(file_path, "wb") as file_obj:
+        pickle.dump(obj, file_obj)
