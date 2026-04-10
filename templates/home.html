@@ -1,246 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Student Performance Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
-body {
-    background-color: #0f172a;
-    color: #e2e8f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-/* Container */
-.container {
-    width: 900px;
-    display: flex;
-    gap: 20px;
-}
-
-/* Cards */
-.card {
-    background-color: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
-    flex: 1;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-}
-
-/* Headings */
-h2 {
-    margin-bottom: 15px;
-    font-weight: 500;
-}
-
-/* Form */
-.form-control {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    background-color: #020617;
-    color: #e2e8f0;
-}
-
-.form-control:focus {
-    border-color: #38bdf8;
-    outline: none;
-}
-
-/* Dropdown options fix */
-select.form-control option {
-    background-color: #020617;
-    color: #e2e8f0;
-}
-
-/* Button */
-.btn {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 8px;
-    border: none;
-    background-color: #38bdf8;
-    color: #020617;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-color: #0ea5e9;
-}
-
-/* Spinner */
-.spinner {
-    display: none;
-    text-align: center;
-    margin-top: 10px;
-}
-
-.loader {
-    border: 4px solid #334155;
-    border-top: 4px solid #38bdf8;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    animation: spin 1s linear infinite;
-    margin: auto;
-}
-
-@keyframes spin {
-    100% { transform: rotate(360deg); }
-}
-
-/* Result */
-.result-box {
-    text-align: center;
-}
-
-#result {
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.confidence {
-    margin-top: 10px;
-    color: #22c55e;
-    font-size: 14px;
-}
-</style>
-</head>
-
+<html>
 <body>
-
-<div class="container">
-
-<!-- LEFT: FORM -->
-<div class="card">
-<h2>Student Performance Predictor</h2>
-
-<form id="form" action="{{ url_for('predict_datapoint')}}" method="post">
-
-<select class="form-control" name="gender" required>
-<option disabled selected>Gender</option>
-<option value="male">Male</option>
-<option value="female">Female</option>
-</select>
-
-<select class="form-control" name="ethnicity" required>
-<option disabled selected>Ethnicity</option>
-<option value="group A">Group A</option>
-<option value="group B">Group B</option>
-<option value="group C">Group C</option>
-<option value="group D">Group D</option>
-<option value="group E">Group E</option>
-</select>
-
-<select class="form-control" name="parental_level_of_education" required>
-<option disabled selected>Parental Education</option>
-<option value="associate's degree">Associate's degree</option>
-<option value="bachelor's degree">Bachelor's degree</option>
-<option value="high school">High school</option>
-<option value="master's degree">Master's degree</option>
-<option value="some college">Some college</option>
-<option value="some high school">Some high school</option>
-</select>
-
-<select class="form-control" name="lunch" required>
-<option disabled selected>Lunch Type</option>
-<option value="free/reduced">Free/Reduced</option>
-<option value="standard">Standard</option>
-</select>
-
-<select class="form-control" name="test_preparation_course" required>
-<option disabled selected>Test Preparation</option>
-<option value="none">None</option>
-<option value="completed">Completed</option>
-</select>
-
-<input class="form-control" type="number" name="reading_score" placeholder="Reading Score" min="0" max="100" required>
-<input class="form-control" type="number" name="writing_score" placeholder="Writing Score" min="0" max="100" required>
-
-<button class="btn" type="submit">Predict Score</button>
-
-</form>
-
-<div class="spinner" id="spinner">
-<div class="loader"></div>
-<p>Processing...</p>
-</div>
-
-</div>
-
-<!-- RIGHT: RESULT -->
-<div class="card result-box">
-<h2>Prediction Result</h2>
-
-<h1 id="result">{{results}}</h1>
-
-<canvas id="chart"></canvas>
-
-<div class="confidence" id="confidence"></div>
-
-</div>
-
-</div>
-
-<!-- Sound -->
-<audio id="sound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
-
-<script>
-
-// Spinner
-document.getElementById("form").addEventListener("submit", function() {
-    document.getElementById("spinner").style.display = "block";
-});
-
-// Result logic
-window.onload = function() {
-    let resultText = document.getElementById("result").innerText;
-
-    if(resultText && resultText !== "") {
-
-        document.getElementById("sound").play();
-
-        let score = parseFloat(resultText);
-
-        let confidence = Math.min(95, 60 + (score/2));
-
-        document.getElementById("confidence").innerText =
-            "AI Confidence: " + confidence.toFixed(1) + "%";
-
-        const ctx = document.getElementById('chart').getContext('2d');
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Predicted Score'],
-                datasets: [{
-                    label: 'Score',
-                    data: [score]
-                }]
-            }
-        });
-    }
-};
-
-</script>
-
-</body>
+    <div class="login">
+       <h1>Student Exam Performance Indicator</h1>
+   
+       <form action="{{ url_for('predict_datapoint')}}" method="post">
+        <h1>
+            <legend>Student Exam Performance Prediction</legend>
+        </h1>
+        <div class="mb-3">
+            <label class="form-label">Gender</label>
+            <select class="form-control" name="gender" placeholder="Enter you Gender" required>
+                <option class="placeholder" selected disabled value="">Select your Gender</option>
+                <option value="male">
+                    Male
+                </option>
+                <option value="female">
+                    Female
+                </option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Race or Ethnicity</label>
+            <select class="form-control" name="ethnicity" placeholder="Enter you ethnicity" required>
+                <option class="placeholder" selected disabled value="">Select Ethnicity</option>
+                <option value="group A">
+                    Group A
+                </option>
+                <option value="group B">
+                    Group B
+                </option>
+                <option value="group C">
+                    Group C
+                </option>
+                <option value="group D">
+                    Group D
+                </option>
+                <option value="group E">
+                    Group E
+                </option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Parental Level of Education</label>
+            <select class="form-control" name="parental_level_of_education"
+                placeholder="Enter you Parent Education" required>
+                <option class="placeholder" selected disabled value="">Select Parent Education</option>
+                <option value="associate's degree">
+                    associate's degree
+                </option>
+                <option value="bachelor's degree">
+                    bachelor's degree
+                </option>
+                <option value="high school">
+                    high school
+                </option>
+                <option value="master's degree">
+                    master's degree
+                </option>
+                <option value="some college">
+                    some college
+                </option>
+                <option value="some high school">
+                    some high school
+                </option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lunch Type</label>
+            <select class="form-control" name="lunch" placeholder="Enter you Lunch" required>
+                <option class="placeholder" selected disabled value="">Select Lunch Type</option>
+                <option value="free/reduced">
+                    free/reduced
+                </option>
+                <option value="standard">
+                    standard
+                </option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Test preparation Course</label>
+            <select class="form-control" name="test_preparation_course" placeholder="Enter you Course"
+                required>
+                <option class="placeholder" selected disabled value="">Select Test_course</option>
+                <option value="none">
+                    None
+                </option>
+                <option value="completed">
+                    Completed
+                </option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Writing Score out of 100</label>
+            <input class="form-control" type="number" name="reading_score"
+                placeholder="Enter your Reading score" min='0' max='100' />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Reading Score out of 100</label>
+            <input class="form-control" type="number" name="writing_score"
+                placeholder="Enter your Reading Score" min='0' max='100' />
+        </div>
+        <div class="mb-3">
+            <input class="btn btn-primary" type="submit" value="Predict your Maths Score" required />
+        </div>
+    </form>
+    <h2>
+       THE  prediction is {{results}}
+    </h2>
+   <body>
 </html>
